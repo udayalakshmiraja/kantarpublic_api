@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions name="Library"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                  targetNamespace="Library"
+    xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:tns="Library"
+    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+    <xsd:documentation></xsd:documentation>
+    <wsdl:types>
+        <xsd:schema
+            xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="Library">
+            <xsd:complexType name="surveyFile">
+                <xsd:sequence minOccurs="0" maxOccurs="1">
+                    <xsd:element name="surveyNumber" type="xsd:string" minOccurs="1" maxOccurs="1"  ></xsd:element>
+                    <xsd:element name="waveNumber" type="xsd:string" minOccurs="0" maxOccurs="1" ></xsd:element>
+                    <xsd:element name="fileName" type="xsd:string" minOccurs="1" maxOccurs="1"></xsd:element>
+                    <xsd:element name="fileType" type="tns:fileExtType" minOccurs="1" maxOccurs="1"></xsd:element>
+                    <xsd:element name="fileVersion" type="xsd:string" minOccurs="1" maxOccurs="1"></xsd:element>
+                    <xsd:element name="fileLocation" type="xsd:string" minOccurs="0" maxOccurs="1"></xsd:element>
+                    <xsd:element name="surveyfile_ext" type="xsd:string" minOccurs="0" maxOccurs="1" ></xsd:element>
+                    <xsd:element name="token" type="xsd:string" minOccurs="1" maxOccurs="1"></xsd:element>
+                </xsd:sequence>
+            </xsd:complexType>
+            <xsd:complexType name="surveyFileListType">
+                <xsd:sequence maxOccurs="unbounded" minOccurs="0">
+                    <xsd:element name="fileName" type="xsd:string" maxOccurs="unbounded" minOccurs="0"></xsd:element>
+                    <xsd:element name="category" type="xsd:string" maxOccurs="unbounded" minOccurs="0"></xsd:element>
+                    <xsd:element name="fileType" type="tns:fileExtType" maxOccurs="unbounded" minOccurs="0"></xsd:element>
+                    <xsd:element name="status" type="tns:statusValue" maxOccurs="unbounded" minOccurs="0"></xsd:element>
+					<!--UL: Assuming that status is enumerated type of statusValue-->
+                </xsd:sequence>
+            </xsd:complexType>
+            <xsd:simpleType name="statusValue">
+                <xsd:restriction base="xsd:string">
+                    <xsd:enumeration value="noResult"/>
+                    <xsd:enumeration value="partiallyCompleted"/>
+                    <xsd:enumeration value="completed"/>
+                </xsd:restriction>
+            </xsd:simpleType>
+            <xsd:simpleType name="fileExtType">
+                <xsd:restriction base="xsd:string">
+                    <xsd:enumeration value="SAV"/>
+                    <xsd:enumeration value="CSV"/>
+                    <xsd:enumeration value="PDF"/>
+                    <xsd:enumeration value="DOC"/>
+					<xsd:enumeration value="DOCX"/>
+                    <xsd:enumeration value="PPT"/>
+					<xsd:enumeration value="PPTX"/>
+					<xsd:enumeration value="XLSX"/>
+                    <xsd:enumeration value="ZIP"/>
+					<!--UL: Added all types from DB-->
+                </xsd:restriction>
+            </xsd:simpleType>
+        </xsd:schema>
+    </wsdl:types>
+    <wsdl:message name="getSurveyResultStatusRequest">
+        <wsdl:part name="surveyNumber" type="tns:integer" xsi:nil="false"></wsdl:part>
+        <wsdl:part name="token" type="xsd:string" xsi:nil="false"></wsdl:part>
+        <wsdl:part name="waveNumber" type="tns:integer"  xsi:nil="true" ></wsdl:part>
+        <wsdl:part name="getSurveyResultStatusRequest_ext" xsi:nil="true" type="xsd:string"   ></wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="getSurveyResultStatusResponse">
+        <wsdl:part name="surveyFileList" type="xsd:surveyFileListType" ></wsdl:part>
+        <wsdl:part name="status" type="tns:statusValue" xsi:nil="false"></wsdl:part>
+        <wsdl:part name="getSurveyResultStatusResponse_ext" type="xsd:string"  xsi:nil="true" ></wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="getDataFileRequest">
+        <!-- AK: Why the definition of this request has been changed from what I proposed in my version? What are the advantages? -->
+		<!-- UL: We are downloading single file at a time.So Complex list type is not required-->
+		<!-- UL: This is usefull for passing single parameters instead of object as a list-->
+        <wsdl:part name="surveyNumber" type="tns:integer" xsi:nil="false"></wsdl:part>
+        <wsdl:part name="fileName" type="xsd:string" xsi:nil="false"></wsdl:part>
+        <wsdl:part name="fileType" type="tns:fileExtType" xsi:nil="false"></wsdl:part>
+        <wsdl:part name="token" type="xsd:string" xsi:nil="false"></wsdl:part>
+        <wsdl:part name="getDataFileRequest_ext" type="xsd:string" xsi:nil="false"></wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="getDataFileResponse">
+        <wsdl:part name="fileName" type="xsd:surveyFile" xsi:nil="false"></wsdl:part>
+        <wsdl:part name="getDataFileResponse_ext" type="xsd:string" xsi:nil="true" ></wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="getTokenRequest">
+        <!-- AK: How the security will be enforced using this? Can you please explain the security approach? -->
+        <!-- UL: To Secure the api calls we are generating token dynamically for some period and using that token only these two api calls will be called in that period after some period the token expires. So that the api urls cannot be accessed by other users.-->
+        <wsdl:part name="token" type="xsd:string" ></wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="getTokenResponse">
+        <wsdl:part name="token" type="xsd:string" ></wsdl:part>
+    </wsdl:message>
+    <wsdl:portType name="Library">
+        <wsdl:operation name="getSurveyResultStatus">
+            <wsdl:input message="tns:getSurveyResultStatusRequest"/>
+            <wsdl:output message="tns:getSurveyResultStatusResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="getDataFile">
+            <wsdl:input message="tns:getDataFileRequest"/>
+            <wsdl:output message="tns:getDataFileResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="getToken">
+            <wsdl:input message="tns:getTokenRequest"/>
+            <wsdl:output message="tns:getTokenResponse"/>
+        </wsdl:operation>
+    </wsdl:portType>
+    <wsdl:binding name="Library" type="tns:Library">
+        <soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsdl:operation name="getSurveyResultStatus">
+            <soap:operation soapAction="http://localhost/sos/kpfileserver.php?getfileslist"/>
+            <wsdl:input>
+                <soap:body use="literal" namespace="Library"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal" namespace="Library"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getDataFile">
+            <soap:operation soapAction="http://localhost/sos/kpfileserver.php?getdatafile"/>
+            <wsdl:input>
+                <soap:body use="literal" namespace="Library"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal" namespace="Library"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getToken">
+            <soap:operation soapAction="http://localhost/sos/kpfileserver.php?getsecuritytoken"/>
+            <wsdl:input>
+                <soap:body use="literal" namespace="Library"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal" namespace="Library"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:service name="Library">
+        <wsdl:port binding="tns:Library" name="FileLibrary">
+            <soap:address location="http://localhost/sos/kpfileserver.php"/>
+        </wsdl:port>
+    </wsdl:service>
+</wsdl:definitions>
